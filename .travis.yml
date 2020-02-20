@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t patinador/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true patinador/react-test npm run test
+
+after_success:
+    - docker build -t patinador/multi-client ./client
+    - docker build -t patinador/multi-nginx ./nginx
+    - docker build -t patinador/multi-server ./server
+    - docker build -t patinador/multi-worker ./worker
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push patinador/multi-client
+    - docker push patinador/multi-nginx
+    - docker push patinador/multi-server
+    - docker push patinador/multi-worker
