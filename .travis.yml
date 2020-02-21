@@ -9,12 +9,24 @@ script:
   - docker run -e CI=true patinador/react-test npm run test
 
 after_success:
-    - docker build -t patinador/multi-client ./client
-    - docker build -t patinador/multi-nginx ./nginx
-    - docker build -t patinador/multi-server ./server
-    - docker build -t patinador/multi-worker ./worker
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
-    - docker push patinador/multi-client
-    - docker push patinador/multi-nginx
-    - docker push patinador/multi-server
-    - docker push patinador/multi-worker
+  - docker build -t patinador/multi-client ./client
+  - docker build -t patinador/multi-nginx ./nginx
+  - docker build -t patinador/multi-server ./server
+  - docker build -t patinador/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push patinador/multi-client
+  - docker push patinador/multi-nginx
+  - docker push patinador/multi-server
+  - docker push patinador/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: us-east-2
+  app: multi-docker
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-us-east-2-106414105579
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
